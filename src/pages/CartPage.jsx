@@ -158,7 +158,7 @@ const CartPage = () => {
       const oldCartItems = [...cartItems];
       setCartItems((prevItems) =>
         prevItems.filter((item) => item.id !== cartId)
-      );
+      ); 
  
       try {
         await axios.delete(
