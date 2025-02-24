@@ -16,7 +16,7 @@ import Order from "../pages/Order";
 
 const AppRouter = () => {
   return (
-    <Router>
+    <Router basename="/">
       <Header />
       <Routes>
         <Route path="/" element={<Home />} />
