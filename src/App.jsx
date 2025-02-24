@@ -82,7 +82,6 @@
 
 
 
-
 import { useEffect } from "react";
 import { useDispatch } from "react-redux";
 import { setShops } from "./redux/shopSlice";
@@ -113,6 +112,11 @@ function App() {
 
     fetchBranches();
     const interval = setInterval(fetchBranches, 5000);
+
+    if (window.Telegram?.WebApp) {
+      window.Telegram.WebApp.expand();
+      window.Telegram.WebApp.setBackgroundColor("#ffffff"); 
+    }
 
     return () => clearInterval(interval);
   }, [dispatch]);
