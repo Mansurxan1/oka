@@ -84,6 +84,7 @@
 
 import { useEffect } from "react";
 import { useDispatch } from "react-redux";
+import { setUser } from "./redux/userSlice";
 import { setShops } from "./redux/shopSlice";
 import AppRouter from "./Router/AppRouter";
 import BranchModal from "./components/BranchModal";
@@ -115,7 +116,12 @@ function App() {
 
     if (window.Telegram?.WebApp) {
       window.Telegram.WebApp.expand();
-      window.Telegram.WebApp.setBackgroundColor("#ffffff"); 
+      window.Telegram.WebApp.setBackgroundColor("#ffffff");
+
+      const tgUser = window.Telegram.WebApp.initDataUnsafe?.user;
+      if (tgUser) {
+        dispatch(setUser(tgUser));
+      }
     }
 
     return () => clearInterval(interval);
