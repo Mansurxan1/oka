@@ -80,8 +80,6 @@
 
 // export default App;
 
-
-
 import { useEffect } from "react";
 import { useDispatch } from "react-redux";
 import { setUser } from "./redux/userSlice";
@@ -120,7 +118,16 @@ function App() {
 
       const tgUser = window.Telegram.WebApp.initDataUnsafe?.user;
       if (tgUser) {
-        dispatch(setUser(tgUser));
+        dispatch(
+          setUser({
+            first_name: tgUser.first_name,
+            last_name: tgUser.last_name,
+            id: tgUser.id,
+            username: tgUser.username,
+            gender: "",
+            birthday: "kk.oo.yyyy",
+          })
+        );
       }
     }
 
