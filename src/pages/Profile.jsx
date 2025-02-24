@@ -1,95 +1,41 @@
-import { useSelector, useDispatch } from "react-redux";
-import { Calendar, User } from "lucide-react";
-import { useState } from "react";
-import DatePicker from "react-datepicker";
-import "react-datepicker/dist/react-datepicker.css";
+import React, { useEffect } from "react";
+import { useDispatch, useSelector } from "react-redux";
 import { setUser } from "../redux/userSlice";
 
 const Profile = () => {
   const dispatch = useDispatch();
   const user = useSelector((state) => state.user.user);
-  const [birthday, setBirthday] = useState(
-    user?.birthday ? new Date(user.birthday) : new Date()
-  );
-  const [gender, setGender] = useState(user?.gender || "");
 
-  const handleDateChange = (date) => {
-    setBirthday(date);
-  };
-
-  const handleGenderChange = (selectedGender) => {
-    setGender(selectedGender);
-  };
-
-  const handleSave = () => {
-    dispatch(
-      setUser({
-        ...user,
-        birthday: birthday.toISOString().split("T")[0],
-        gender: gender,
-      })
-    );
-  };
+  useEffect(() => {
+    if (window.Telegram && window.Telegram.WebApp) {
+      const tgUser = window.Telegram.WebApp.initDataUnsafe.user;
+      if (tgUser) {
+        dispatch(setUser(tgUser));
+      }
+    }
+  }, [dispatch]);
 
   return (
-    <div className="flex mt-20 items-center justify-center bg-white">
-      <div className="relative rounded-2xl min-h-screen p-6 w-full max-w-md bg-white shadow-lg">
-        <h2 className="text-xl font-semibold text-center text-gray-800 mb-4">
-          Личные данные
-        </h2>
-
-        <div className="bg-gray-100 p-3 rounded-lg flex items-center space-x-3">
-          <User size={20} className="text-gray-500" />
-          <div className="flex flex-col">
-            <span className="text-sm text-gray-500">ФИО</span>
-            <span className="text-lg font-medium">
-              {user?.first_name || "Имя"}
-            </span>
-          </div>
-        </div>
-
-        <div className="bg-gray-100 p-3 rounded-lg flex items-center space-x-3 mt-3">
-          <Calendar size={20} className="text-gray-500" />
-          <div className="flex flex-col w-full">
-            <span className="text-sm text-gray-500">Дата рождения</span>
-            <DatePicker
-              selected={birthday}
-              onChange={handleDateChange}
-              className="text-lg font-medium bg-transparent focus:outline-none"
-              dateFormat="yyyy-MM-dd"
+    <div className="flex items-center justify-center min-h-screen bg-gray-100">
+      <div className="bg-white shadow-lg rounded-2xl p-6 w-80 text-center">
+        {user ? (
+          <>
+            <img
+              src={user.photo_url}
+              alt="Telegram avatar"
+              className="w-24 h-24 rounded-full mx-auto border-4 border-blue-500 shadow-md"
             />
-          </div>
-        </div>
-
-        <div className="mt-4 flex space-x-3">
-          <button
-            onClick={() => handleGenderChange("male")}
-            className={`w-full p-2 rounded-lg text-lg font-medium transition ${
-              gender === "male"
-                ? "bg-black text-white"
-                : "bg-gray-200 text-gray-500"
-            }`}
-          >
-            Мужчина
-          </button>
-          <button
-            onClick={() => handleGenderChange("female")}
-            className={`w-full p-2 rounded-lg text-lg font-medium transition ${
-              gender === "female"
-                ? "bg-black text-white"
-                : "bg-gray-200 text-gray-500"
-            }`}
-          >
-            Женщина
-          </button>
-        </div>
-
-        <button
-          onClick={handleSave}
-          className="absolute bottom-5 left-0 right-0 mx-auto w-11/12 bg-black text-white py-3 rounded-xl flex items-center justify-center text-lg font-medium shadow-lg transition hover:bg-gray-900"
-        >
-          Сохранить
-        </button>
+            <h2 className="text-xl font-bold mt-3 text-gray-800">
+              {user.first_name}
+            </h2>
+            {user.username && <p className="text-gray-500">@{user.username}</p>}
+            <button className="mt-4 w-full bg-blue-500 text-white py-2 rounded-lg shadow hover:bg-blue-600 transition">
+              Tahrirlash
+            </button>
+          </>
+        ) : (
+          <p className="text-gray-500">Foydalanuvchi ma’lumotlari yo‘q</p>
+        )}
       </div>
     </div>
   );

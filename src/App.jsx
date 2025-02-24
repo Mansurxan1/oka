@@ -80,9 +80,11 @@
 
 // export default App;
 
+
+
+
 import { useEffect } from "react";
 import { useDispatch } from "react-redux";
-import { setUser } from "./redux/userSlice";
 import { setShops } from "./redux/shopSlice";
 import AppRouter from "./Router/AppRouter";
 import BranchModal from "./components/BranchModal";
@@ -111,25 +113,6 @@ function App() {
 
     fetchBranches();
     const interval = setInterval(fetchBranches, 5000);
-
-    if (window.Telegram?.WebApp) {
-      window.Telegram.WebApp.expand();
-      window.Telegram.WebApp.setBackgroundColor("#ffffff");
-
-      const tgUser = window.Telegram.WebApp.initDataUnsafe?.user;
-      if (tgUser) {
-        dispatch(
-          setUser({
-            first_name: tgUser.first_name,
-            last_name: tgUser.last_name,
-            id: tgUser.id,
-            username: tgUser.username,
-            gender: "",
-            birthday: "kk.oo.yyyy",
-          })
-        );
-      }
-    }
 
     return () => clearInterval(interval);
   }, [dispatch]);
