@@ -80,8 +80,6 @@
 
 // export default App;
 
-
-
 import { useEffect } from "react";
 import { useDispatch } from "react-redux";
 import { setShops } from "./redux/shopSlice";
@@ -115,7 +113,8 @@ function App() {
 
     if (window.Telegram?.WebApp) {
       window.Telegram.WebApp.expand();
-      window.Telegram.WebApp.setBackgroundColor("#ffffff"); 
+      window.Telegram.WebApp.setBackgroundColor("#ffffff");
+      window.Telegram.WebApp.setHeaderColor("bg_color");
     }
 
     return () => clearInterval(interval);
