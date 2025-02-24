@@ -3,6 +3,7 @@ import Search from "../components/Search";
 import Banner from "../components/Banner";
 import Categories from "../components/Categories";
 import Product from "../components/Product";
+import Header from "../components/Header";
 
 const Home = () => {
   useEffect(() => {
@@ -11,6 +12,7 @@ const Home = () => {
 
   return (
     <>
+      <Header />
       <Search />
       <Banner />
       <Categories />

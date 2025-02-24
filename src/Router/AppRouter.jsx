@@ -1,6 +1,5 @@
 import React from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
-import Header from "../components/Header";
 import Home from "../pages/Home";
 import Profile from "../pages/Profile";
 import Branches from "../pages/Branches";
@@ -17,7 +16,6 @@ import Order from "../pages/Order";
 const AppRouter = () => {
   return (
     <Router basename="/">
-      <Header />
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/profile" element={<Profile />} />

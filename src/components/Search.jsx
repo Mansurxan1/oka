@@ -36,7 +36,7 @@ function Search() {
   };
 
   return (
-    <section className="w-full mt-[80px] min-w-[200px] max-w-md mx-auto">
+    <section className="w-full min-w-[200px] max-w-md mx-auto">
       <div className="p-4 pt-0">
         <form
           onSubmit={handleSubmit}

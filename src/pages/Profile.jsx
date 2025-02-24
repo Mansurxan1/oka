@@ -1,5 +1,3 @@
-"use client";
-
 import { ArrowLeft, Calendar, User } from "lucide-react";
 import { useState } from "react";
 import DatePicker from "react-datepicker";
@@ -8,9 +6,11 @@ import "react-datepicker/dist/react-datepicker.css";
 export default function PersonalData() {
   const [gender, setGender] = useState("male");
   const [birthDate, setBirthDate] = useState(new Date("2001-03-17"));
-  const [fullName, setFullName] = useState("Mansurxon");
+  const [fullName, setFullName] = useState("ISM");
+  const [isActive, setIsActive] = useState(false);
 
   const formatDate = (date) => {
+    if (!date) return "";
     return date.toLocaleDateString("ru", {
       day: "2-digit",
       month: "2-digit",
@@ -20,7 +20,6 @@ export default function PersonalData() {
 
   return (
     <div className="mt-[80px] max-w-lg mx-auto p-4 min-h-screen bg-white">
-      {/* Header */}
       <div className="flex items-center gap-4 mb-6">
         <button className="p-2">
           <ArrowLeft className="w-6 h-6" />
@@ -28,9 +27,7 @@ export default function PersonalData() {
         <h1 className="text-xl font-semibold">Личные данные</h1>
       </div>
 
-      {/* Form */}
       <form className="space-y-4">
-        {/* Full Name Field */}
         <div className="relative bg-gray-100 rounded-xl p-4">
           <div className="flex items-center gap-3">
             <User className="w-6 h-6 text-gray-500" />
@@ -40,13 +37,14 @@ export default function PersonalData() {
                 type="text"
                 value={fullName}
                 onChange={(e) => setFullName(e.target.value)}
+                onFocus={() => setIsActive(true)}
+                onBlur={() => setIsActive(false)}
                 className="bg-transparent border-none outline-none text-lg"
               />
             </div>
           </div>
         </div>
 
-        {/* Date of Birth Field */}
         <div className="relative bg-gray-100 rounded-xl p-4">
           <div className="flex items-center gap-3">
             <Calendar className="w-6 h-6 text-gray-500" />
@@ -55,6 +53,8 @@ export default function PersonalData() {
               <DatePicker
                 selected={birthDate}
                 onChange={(date) => setBirthDate(date)}
+                onFocus={() => setIsActive(true)}
+                onBlur={() => setIsActive(false)}
                 dateFormat="dd-MM-yyyy"
                 showYearDropdown
                 showMonthDropdown
@@ -73,8 +73,6 @@ export default function PersonalData() {
             </div>
           </div>
         </div>
-
-        {/* Gender Selection */}
         <div className="flex gap-3 mt-4">
           <button
             type="button"
@@ -100,10 +98,13 @@ export default function PersonalData() {
           </button>
         </div>
 
-        {/* Save Button */}
         <button
           type="submit"
-          className="w-[60%] bg-black text-white py-4 rounded-full mt-auto text-lg font-medium hover:bg-gray-900 transition-colors fixed bottom-4 left-4 right-4 max-w-lg mx-auto"
+          className={`w-[60%] bg-black text-white py-4 rounded-full mt-auto text-lg font-medium hover:bg-gray-900 transition-colors ${
+            isActive
+              ? "relative -bottom-44"
+              : "fixed bottom-4 left-4 right-4 max-w-lg mx-auto"
+          }`}
         >
           Сохранить
         </button>
