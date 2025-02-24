@@ -114,13 +114,8 @@ function App() {
     const interval = setInterval(fetchBranches, 5000);
 
     if (window.Telegram?.WebApp) {
-      const tg = window.Telegram.WebApp;
-      tg.expand();
-      tg.setBackgroundColor("#ffffff"); // Oq fon
-      tg.setHeaderColor("bg_color"); // Header ham oq rangda bo‘lishi uchun
-
-      // Telegram interfeysiga mos matn rangini olish
-      document.body.style.color = tg.themeParams.text_color || "#000000";
+      window.Telegram.WebApp.expand();
+      window.Telegram.WebApp.setBackgroundColor("#ffffff"); 
     }
 
     return () => clearInterval(interval);
