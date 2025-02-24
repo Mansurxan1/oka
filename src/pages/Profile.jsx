@@ -8,15 +8,31 @@ import { setUser } from "../redux/userSlice";
 const Profile = () => {
   const dispatch = useDispatch();
   const user = useSelector((state) => state.user.user);
-  const [birthday, setBirthday] = useState(user?.birthday || new Date());
+  const [birthday, setBirthday] = useState(
+    user?.birthday ? new Date(user.birthday) : new Date()
+  );
+  const [gender, setGender] = useState(user?.gender || "");
 
   const handleDateChange = (date) => {
     setBirthday(date);
-    dispatch(setUser({ ...user, birthday: date.toISOString().split("T")[0] }));
+  };
+
+  const handleGenderChange = (selectedGender) => {
+    setGender(selectedGender);
+  };
+
+  const handleSave = () => {
+    dispatch(
+      setUser({
+        ...user,
+        birthday: birthday.toISOString().split("T")[0],
+        gender: gender,
+      })
+    );
   };
 
   return (
-    <div className="flex mt-[80px] items-center justify-center bg-white">
+    <div className="flex mt-20 items-center justify-center bg-white">
       <div className="relative rounded-2xl min-h-screen p-6 w-full max-w-md bg-white shadow-lg">
         <h2 className="text-xl font-semibold text-center text-gray-800 mb-4">
           Личные данные
@@ -32,13 +48,12 @@ const Profile = () => {
           </div>
         </div>
 
-        {/* Kalendar */}
         <div className="bg-gray-100 p-3 rounded-lg flex items-center space-x-3 mt-3">
           <Calendar size={20} className="text-gray-500" />
           <div className="flex flex-col w-full">
             <span className="text-sm text-gray-500">Дата рождения</span>
             <DatePicker
-              selected={new Date(birthday)}
+              selected={birthday}
               onChange={handleDateChange}
               className="text-lg font-medium bg-transparent focus:outline-none"
               dateFormat="yyyy-MM-dd"
@@ -48,8 +63,9 @@ const Profile = () => {
 
         <div className="mt-4 flex space-x-3">
           <button
+            onClick={() => handleGenderChange("male")}
             className={`w-full p-2 rounded-lg text-lg font-medium transition ${
-              user?.gender === "male"
+              gender === "male"
                 ? "bg-black text-white"
                 : "bg-gray-200 text-gray-500"
             }`}
@@ -57,8 +73,9 @@ const Profile = () => {
             Мужчина
           </button>
           <button
+            onClick={() => handleGenderChange("female")}
             className={`w-full p-2 rounded-lg text-lg font-medium transition ${
-              user?.gender === "female"
+              gender === "female"
                 ? "bg-black text-white"
                 : "bg-gray-200 text-gray-500"
             }`}
@@ -67,7 +84,10 @@ const Profile = () => {
           </button>
         </div>
 
-        <button className="absolute bottom-5 left-0 right-0 mx-auto w-11/12 bg-black text-white py-3 rounded-xl flex items-center justify-center text-lg font-medium shadow-lg transition hover:bg-gray-900">
+        <button
+          onClick={handleSave}
+          className="absolute bottom-5 left-0 right-0 mx-auto w-11/12 bg-black text-white py-3 rounded-xl flex items-center justify-center text-lg font-medium shadow-lg transition hover:bg-gray-900"
+        >
           Сохранить
         </button>
       </div>
