@@ -1,44 +1,113 @@
-import React, { useEffect } from "react";
-import { useDispatch, useSelector } from "react-redux";
-import { setUser } from "../redux/userSlice";
+"use client";
 
-const Profile = () => {
-  const dispatch = useDispatch();
-  const user = useSelector((state) => state.user.user);
+import { ArrowLeft, Calendar, User } from "lucide-react";
+import { useState } from "react";
+import DatePicker from "react-datepicker";
+import "react-datepicker/dist/react-datepicker.css";
 
-  useEffect(() => {
-    if (window.Telegram && window.Telegram.WebApp) {
-      const tgUser = window.Telegram.WebApp.initDataUnsafe.user;
-      if (tgUser) {
-        dispatch(setUser(tgUser));
-      }
-    }
-  }, [dispatch]);
+export default function PersonalData() {
+  const [gender, setGender] = useState("male");
+  const [birthDate, setBirthDate] = useState(new Date("2001-03-17"));
+  const [fullName, setFullName] = useState("Mansurxon");
+
+  const formatDate = (date) => {
+    return date.toLocaleDateString("ru", {
+      day: "2-digit",
+      month: "2-digit",
+      year: "numeric",
+    });
+  };
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-gray-100">
-      <div className="bg-white shadow-lg rounded-2xl p-6 w-80 text-center">
-        {user ? (
-          <>
-            <img
-              src={user.photo_url}
-              alt="Telegram avatar"
-              className="w-24 h-24 rounded-full mx-auto border-4 border-blue-500 shadow-md"
-            />
-            <h2 className="text-xl font-bold mt-3 text-gray-800">
-              {user.first_name}
-            </h2>
-            {user.username && <p className="text-gray-500">@{user.username}</p>}
-            <button className="mt-4 w-full bg-blue-500 text-white py-2 rounded-lg shadow hover:bg-blue-600 transition">
-              Tahrirlash
-            </button>
-          </>
-        ) : (
-          <p className="text-gray-500">Foydalanuvchi ma’lumotlari yo‘q</p>
-        )}
+    <div className="mt-[80px] max-w-lg mx-auto p-4 min-h-screen bg-white">
+      {/* Header */}
+      <div className="flex items-center gap-4 mb-6">
+        <button className="p-2">
+          <ArrowLeft className="w-6 h-6" />
+        </button>
+        <h1 className="text-xl font-semibold">Личные данные</h1>
       </div>
+
+      {/* Form */}
+      <form className="space-y-4">
+        {/* Full Name Field */}
+        <div className="relative bg-gray-100 rounded-xl p-4">
+          <div className="flex items-center gap-3">
+            <User className="w-6 h-6 text-gray-500" />
+            <div className="flex flex-col">
+              <label className="text-sm text-gray-500">ФИО</label>
+              <input
+                type="text"
+                value={fullName}
+                onChange={(e) => setFullName(e.target.value)}
+                className="bg-transparent border-none outline-none text-lg"
+              />
+            </div>
+          </div>
+        </div>
+
+        {/* Date of Birth Field */}
+        <div className="relative bg-gray-100 rounded-xl p-4">
+          <div className="flex items-center gap-3">
+            <Calendar className="w-6 h-6 text-gray-500" />
+            <div className="flex flex-col flex-1">
+              <label className="text-sm text-gray-500">Дата рождения</label>
+              <DatePicker
+                selected={birthDate}
+                onChange={(date) => setBirthDate(date)}
+                dateFormat="dd-MM-yyyy"
+                showYearDropdown
+                showMonthDropdown
+                dropdownMode="select"
+                yearDropdownItemNumber={100}
+                maxDate={new Date()}
+                customInput={
+                  <input
+                    className="bg-transparent border-none outline-none text-lg w-full z-[999] cursor-pointer"
+                    value={formatDate(birthDate)}
+                    readOnly
+                  />
+                }
+                className="react-datepicker-custom"
+              />
+            </div>
+          </div>
+        </div>
+
+        {/* Gender Selection */}
+        <div className="flex gap-3 mt-4">
+          <button
+            type="button"
+            onClick={() => setGender("male")}
+            className={`flex-1 py-3 px-6 rounded-full text-center transition-colors ${
+              gender === "male"
+                ? "bg-black text-white"
+                : "bg-gray-100 text-gray-900"
+            }`}
+          >
+            Мужчина
+          </button>
+          <button
+            type="button"
+            onClick={() => setGender("female")}
+            className={`flex-1 py-3 px-6 rounded-full text-center transition-colors ${
+              gender === "female"
+                ? "bg-black text-white"
+                : "bg-gray-100 text-gray-900"
+            }`}
+          >
+            Женщина
+          </button>
+        </div>
+
+        {/* Save Button */}
+        <button
+          type="submit"
+          className="w-[60%] bg-black text-white py-4 rounded-full mt-auto text-lg font-medium hover:bg-gray-900 transition-colors fixed bottom-4 left-4 right-4 max-w-lg mx-auto"
+        >
+          Сохранить
+        </button>
+      </form>
     </div>
   );
-};
-
-export default Profile;
+}
