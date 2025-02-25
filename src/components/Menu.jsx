@@ -2,8 +2,8 @@ import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { useState, useEffect } from "react";
-import { FcHome, FcLike } from "react-icons/fc";
-import { FaUser } from "react-icons/fa";
+import { FcLike } from "react-icons/fc";
+import { FaHome, FaUser } from "react-icons/fa";
 import { LuPhoneCall, LuShoppingBasket } from "react-icons/lu";
 import { FiShoppingCart } from "react-icons/fi";
 import { FaMapLocationDot } from "react-icons/fa6";
@@ -16,10 +16,7 @@ const Menu = ({ onClose }) => {
   const [selectedLanguage, setSelectedLanguage] = useState("uz");
 
   useEffect(() => {
-    const savedLogo = localStorage.getItem("userLogo");
     const savedLang = localStorage.getItem("language");
-
-    if (savedLogo) setSelectedLogo(savedLogo);
     if (savedLang) {
       setSelectedLanguage(savedLang);
       i18n.changeLanguage(savedLang);
@@ -32,36 +29,32 @@ const Menu = ({ onClose }) => {
     setSelectedLanguage(lang);
   };
 
-  const handleImageUpload = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onload = (event) => {
-        setSelectedLogo(event.target.result);
-        localStorage.setItem("userLogo", event.target.result);
-      };
-      reader.readAsDataURL(file);
-    }
-  };
-
   return (
     <>
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 0.5 }}
         exit={{ opacity: 0 }}
-        className="fixed inset-0 bg-black"
+        className="fixed inset-0 bg-black z-[9998]"
         onClick={onClose}
       />
 
       <motion.div
-        initial={{ scale: 0, opacity: 0 }}
-        animate={{ scale: 1, opacity: 1 }}
-        exit={{ scale: 0, opacity: 0 }}
-        transition={{ type: "spring", duration: 0.5 }}
-        className="fixed top-0 z-[9999] w-full max-w-[450px] bg-white min-h-screen overflow-y-auto p-4 scrollbar-hide"
+        initial={{ x: "-100%" }}
+        animate={{ x: "0%" }}
+        exit={{ x: "-100%" }}
+        transition={{ type: "spring", stiffness: 100, damping: 20 }}
+        drag="x"
+        dragConstraints={{ left: 0, right: 0 }}
+        dragElastic={0.2}
+        onDragEnd={(event, info) => {
+          if (info.offset.x < -100) {
+            onClose();
+          }
+        }}
+        className="fixed top-0 left-0 z-[9999] w-[90%] bg-white min-h-screen overflow-y-auto p-4 shadow-lg rounded-r-[30px]"
       >
-        <div className="relative flex flex-col items-center mb-6">
+        <div className="relative mx-auto max-w-[450px] flex flex-col items-center mb-6">
           <Link to={"/"} onClick={onClose}>
             <img
               src={Logo}
@@ -80,7 +73,7 @@ const Menu = ({ onClose }) => {
             onClick={onClose}
             className="flex items-center text-lg gap-3 px-2 py-1 hover:bg-gray-100 rounded-lg w-full"
           >
-            <FcHome className="text-xl" />
+            <FaHome className="text-xl text-gray-600" />
             <span>{t("home")}</span>
           </Link>
           <Link
@@ -88,7 +81,7 @@ const Menu = ({ onClose }) => {
             onClick={onClose}
             className="flex items-center text-lg gap-3 px-2 py-1 hover:bg-gray-100 rounded-lg w-full"
           >
-            <FaUser className="text-blue-600 text-xl" />
+            <FaUser className="text-gray-600 text-xl" />
             <span>{t("profile")}</span>
           </Link>
           <Link
@@ -96,7 +89,7 @@ const Menu = ({ onClose }) => {
             onClick={onClose}
             className="flex items-center gap-3 px-2 text-lg py-1 hover:bg-gray-100 rounded-lg w-full"
           >
-            <FiShoppingCart className="text-blue-600 text-xl" />
+            <FiShoppingCart className="text-gray-600" />
             <span>{t("cart")}</span>
           </Link>
           <Link
@@ -104,7 +97,7 @@ const Menu = ({ onClose }) => {
             onClick={onClose}
             className="flex items-center gap-3 text-lg px-2 py-1 hover:bg-gray-100 rounded-lg w-full"
           >
-            <LuShoppingBasket className="text-blue-600 text-xl" />
+            <LuShoppingBasket className="text-gray-600 text-xl" />
             <span>{t("orders")}</span>
           </Link>
           <Link
@@ -120,7 +113,7 @@ const Menu = ({ onClose }) => {
             onClick={onClose}
             className="flex items-center text-lg gap-3 px-2 py-1 hover:bg-gray-100 rounded-lg w-full"
           >
-            <FaMapLocationDot className="text-blue-500 text-xl" />
+            <FaMapLocationDot className="text-gray-500 text-xl" />
             <span>{t("locations")}</span>
           </Link>
           <a
@@ -128,7 +121,7 @@ const Menu = ({ onClose }) => {
             onClick={onClose}
             className="flex items-center gap-3 text-lg px-2 py-1 hover:bg-gray-100 rounded-lg w-full"
           >
-            <LuPhoneCall className="text-blue-600 text-xl" />
+            <LuPhoneCall className="text-gray-600 text-xl" />
             <span>{t("contact")}</span>
           </a>
         </nav>

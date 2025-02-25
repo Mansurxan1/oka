@@ -32,9 +32,9 @@ function Header() {
 
           <div
             onClick={() => navigate("/locations")}
-            className="flex-1 flex items-center !max-w-[255px] gap-2 border border-gray-300 p-1 rounded-lg overflow-hidden"
+            className="flex-1 flex items-center !max-w-[255px] border border-gray-300 p-1 rounded-lg overflow-hidden"
           >
-            <FaLocationDot className="w-5 h-5 text-blue-500 flex-shrink-0" />
+            <FaLocationDot className="w-9 h-7 text-blue-500 flex-shrink-0" />
             <div className="min-w-0 flex-1">
               <p className="text-xs text-gray-500">{t("city")}</p>
               <p className="font-medium text-[14px] capitalize truncate">

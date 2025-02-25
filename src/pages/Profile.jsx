@@ -14,7 +14,7 @@ export default function PersonalData() {
   const storedBirthDate = localStorage.getItem("birthDate");
   const initialBirthDate = storedBirthDate
     ? new Date(storedBirthDate)
-    : new Date("2001-03-17");
+    : new Date("kk.oo.yyyy");
 
   const [fullName, setFullName] = useState(
     localStorage.getItem("fullName") || user?.fullName || "ISM"

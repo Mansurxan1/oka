@@ -1,12 +1,9 @@
-"use client";
-
 import { useEffect, useState, useCallback } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useParams, useNavigate } from "react-router-dom";
 import { fetchProducts } from "../redux/productSlice";
 import { useTranslation } from "react-i18next";
-import Search from "../components/Search";
-import { FaAngleDown, FaCartPlus } from "react-icons/fa";
+import { FaAngleDown } from "react-icons/fa";
 import { AiOutlineMinus, AiOutlinePlus } from "react-icons/ai";
 import AOS from "aos";
 import "aos/dist/aos.css";
@@ -24,94 +21,213 @@ const CategoryProducts = () => {
   const { products, loading, error, status } = useSelector(
     (state) => state.products
   );
+  const selectedBranch = useSelector((state) => state.shops.selectedBranch);
 
   const [favorites, setFavorites] = useState({});
   const [cartItems, setCartItems] = useState({});
   const [cartLoading, setCartLoading] = useState(true);
+  const [initialLoad, setInitialLoad] = useState(true); // Birinchi yuklanishni nazorat qilish uchun
 
+  // AOS ni faqat bir marta ishga tushirish
   useEffect(() => {
     AOS.init();
     window.scrollTo(0, 0);
-  }, []);
+  }, []); // Bo'sh dependency array bilan faqat bir marta ishlaydi
 
-  useEffect(() => {
-    if (status === "idle") {
-      dispatch(fetchProducts());
-    }
-  }, [dispatch, status]);
-
+  // Savat ma'lumotlarini olish
   const fetchCartData = useCallback(async () => {
     try {
       setCartLoading(true);
       const response = await axios.get(`${import.meta.env.VITE_CARTS}`);
-      const cartData = response.data;
-
-      const cartItemsMap = {};
-      if (Array.isArray(cartData)) {
-        cartData.forEach((item) => {
-          cartItemsMap[item.product_id] = {
-            cartId: item.id,
-            count: item.count,
-            tip: item.tip,
-          };
-        });
-      }
+      const cartData = Array.isArray(response.data) ? response.data : [];
+      const cartItemsMap = cartData.reduce((acc, item) => {
+        acc[item.product_id] = {
+          cartId: item.id,
+          count: item.count,
+          tip: item.tip,
+        };
+        return acc;
+      }, {});
       setCartItems(cartItemsMap);
+      console.log("Savat ma'lumotlari yuklandi:", cartItemsMap);
     } catch (error) {
-      console.error("Error fetching cart data:", error);
+      console.error("Savat ma'lumotlarini olishda xato:", error);
     } finally {
       setCartLoading(false);
     }
   }, []);
 
+  // Mahsulotlarni va savatni birinchi marta yuklash
   useEffect(() => {
-    fetchCartData();
-  }, [fetchCartData]);
+    if (selectedBranch?.id && initialLoad) {
+      dispatch(fetchProducts(selectedBranch.id));
+      fetchCartData();
+      setInitialLoad(false); // Birinchi yuklanish tugadi
+    }
+  }, [dispatch, selectedBranch, fetchCartData, initialLoad]);
 
+  // CategoryId o'zgarganda qayta yuklash
+  useEffect(() => {
+    if (selectedBranch?.id && !initialLoad) {
+      dispatch(fetchProducts(selectedBranch.id));
+    }
+  }, [categoryId, selectedBranch, dispatch]);
+
+  // Savatdagi mahsulot miqdorini yangilash (avval UI, keyin API)
   const updateCartQuantity = async (productId, newCount) => {
     const cartItem = cartItems[productId];
     if (!cartItem) return;
 
+    // Avval UI’da yangilaymiz
+    if (newCount < 1) {
+      setCartItems((prev) => {
+        const newItems = { ...prev };
+        delete newItems[productId];
+        return newItems;
+      });
+      console.log("UI’da savatdan o'chirildi, ID:", productId);
+    } else {
+      setCartItems((prev) => ({
+        ...prev,
+        [productId]: { ...prev[productId], count: newCount },
+      }));
+      console.log("UI’da savat miqdori yangilandi, ID:", productId);
+    }
+
+    // Keyin API’ga so'rov yuboramiz
     try {
       if (newCount < 1) {
+        console.log("Savatdan o'chirish uchun DELETE so'rov:", cartItem.cartId);
         await axios.delete(
           `${import.meta.env.VITE_CARTS}/delete?cart_id=${cartItem.cartId}`
         );
-        setCartItems((prev) => {
-          const newItems = { ...prev };
-          delete newItems[productId];
-          return newItems;
-        });
+        console.log("API’dan savatdan o'chirildi, ID:", productId);
       } else {
+        const updateData = {
+          cart_id: cartItem.cartId,
+          count: newCount,
+          tip_id: cartItem.tip.id,
+        };
+        console.log("Savatni yangilash uchun PATCH so'rov:", updateData);
         await axios.patch(
           `${import.meta.env.VITE_CARTS}?cart_id=${
             cartItem.cartId
           }&count=${newCount}&tip_id=${cartItem.tip.id}`
         );
-        setCartItems((prev) => ({
-          ...prev,
-          [productId]: {
-            ...prev[productId],
-            count: newCount,
-          },
-        }));
+        console.log("API’da savat miqdori yangilandi, ID:", productId);
       }
     } catch (error) {
-      console.error("Error updating cart:", error);
-      fetchCartData();
+      console.error("Savatni yangilashda xato:", error);
+      fetchCartData(); // Xato bo'lsa serverdan qayta yuklaymiz
     }
   };
 
+  // Savatga mahsulot qo'shish (avval UI, keyin API)
   const addToCart = async (productId) => {
-    try {
-      await axios.post(`${import.meta.env.VITE_CARTS}`, {
-        product_id: productId,
-        count: 1,
-      });
-      fetchCartData();
-    } catch (error) {
-      console.error("Error adding to cart:", error);
+    if (!selectedBranch?.id) {
+      console.error("Xato: Filial tanlanmagan!");
+      return;
     }
+
+    const product = products.find((p) => p.id === productId);
+    const selectedTip =
+      product.tips && product.tips.length > 0 ? product.tips[0] : null;
+    const tipIdToSend = selectedTip ? selectedTip.id : null;
+
+    // Avval UI’da qo‘shamiz
+    setCartItems((prev) => ({
+      ...prev,
+      [productId]: {
+        cartId: null, // API’dan keladi
+        count: 1,
+        tip: selectedTip,
+      },
+    }));
+    console.log("UI’da savatga qo'shildi, ID:", productId);
+
+    // Keyin API’ga so'rov yuboramiz
+    const cartData = new URLSearchParams();
+    cartData.append("product_id", productId);
+    cartData.append("tip_id", tipIdToSend);
+    cartData.append("shop_id", selectedBranch.id);
+    cartData.append("count", 1);
+
+    try {
+      const response = await axios.post(
+        `${import.meta.env.VITE_CARTS}?client_id=5283151626`,
+        cartData,
+        {
+          headers: {
+            Accept: "application/json",
+            "Content-Type": "application/x-www-form-urlencoded",
+          },
+        }
+      );
+      setCartItems((prev) => ({
+        ...prev,
+        [productId]: {
+          ...prev[productId],
+          cartId: response.data.id, // API’dan kelgan ID
+        },
+      }));
+      console.log("API’da savatga qo'shildi, ID:", productId);
+    } catch (error) {
+      console.error("Savatga qo'shishda xato:", error);
+      fetchCartData(); // Xato bo'lsa qayta yuklaymiz
+    }
+  };
+
+  // Sevimlilar holatini o'zgartirish
+  const toggleFavorite = async (productId) => {
+    const isFavorite = favorites[productId];
+    const params = {
+      product_id: productId,
+      shop_id: selectedBranch?.id,
+      bot_user_id: 5283151626,
+    };
+
+    try {
+      if (isFavorite) {
+        console.log("Sevimlidan o'chirish uchun DELETE so'rov:", params);
+        await axios.delete(
+          `${import.meta.env.VITE_API_URL}/favourites-products`,
+          {
+            params,
+          }
+        );
+        setFavorites((prev) => {
+          const newFavorites = { ...prev };
+          delete newFavorites[productId];
+          return newFavorites;
+        });
+        console.log("Sevimli o'chirildi, ID:", productId);
+      } else {
+        console.log("Sevimliga qo'shish uchun POST so'rov:", params);
+        await axios.post(
+          `${import.meta.env.VITE_API_URL}/favourites-products`,
+          null,
+          { params }
+        );
+        setFavorites((prev) => ({
+          ...prev,
+          [productId]: true,
+        }));
+        console.log("Sevimli qo'shildi, ID:", productId);
+      }
+    } catch (error) {
+      console.error(
+        "Sevimlilar bilan ishlashda xato:",
+        error.response || error
+      );
+    }
+  };
+
+  // Narxni formatlash
+  const formatPrice = (price) => {
+    return new Intl.NumberFormat(i18n.language === "uz" ? "uz-UZ" : "en-US", {
+      style: "currency",
+      currency: "UZS",
+    }).format(price);
   };
 
   if (loading || cartLoading) {
@@ -132,23 +248,8 @@ const CategoryProducts = () => {
     (product) => product.category_id === Number.parseInt(categoryId)
   );
 
-  const toggleFavorite = (productId) => {
-    setFavorites((prevFavorites) => ({
-      ...prevFavorites,
-      [productId]: !prevFavorites[productId],
-    }));
-  };
-
-  const formatPrice = (price) => {
-    return new Intl.NumberFormat(i18n.language === "uz" ? "uz-UZ" : "en-US", {
-      style: "currency",
-      currency: "UZS",
-    }).format(price);
-  };
-
   return (
-    <div className="max-w-[450px] mx-auto">
-      <Search />
+    <div className="max-w-[450px] mt-7 mx-auto">
       <div
         className="flex items-center text-center gap-3 mb-4 rounded-bl-[20px] rounded-br-[20px] border-b-[2px] border-b-[#00000050] px-3 pb-4"
         data-aos="fade-down"
@@ -168,6 +269,11 @@ const CategoryProducts = () => {
         {filteredProducts.length > 0 ? (
           filteredProducts.map((product) => {
             const cartItem = cartItems[product.id];
+            const displayPrice = cartItem
+              ? cartItem.tip?.price
+              : product.tips && product.tips.length > 0
+              ? product.tips[0].price
+              : product.price;
 
             return (
               <div
@@ -177,14 +283,14 @@ const CategoryProducts = () => {
                 data-aos-duration="1000"
                 onClick={() => navigate(`/product/${product.id}`)}
               >
-                <div className="relative">
+                <div className="relative p-2">
                   <img
                     src={`${import.meta.env.VITE_API_URL}/${product.photo}`}
                     alt={product[`name_${i18n.language}`]}
                     className="w-full h-[120px] rounded-t-md object-cover"
                   />
                   <span
-                    className="absolute top-1 right-1 bg-white px-1 border rounded-full cursor-pointer"
+                    className="absolute top-3 right-3 bg-white px-1 border rounded-full cursor-pointer"
                     onClick={(e) => {
                       e.stopPropagation();
                       toggleFavorite(product.id);
@@ -201,16 +307,6 @@ const CategoryProducts = () => {
                 <h3 className="text-sm px-2 font-medium capitalize truncate mt-2">
                   {product[`name_${i18n.language}`]}
                 </h3>
-
-                <p className="flex items-center justify-between font-medium text-xs py-1 mx-2">
-                  <span>
-                    {cartItem ? cartItem.tip.volume : product.volume}{" "}
-                    {cartItem ? cartItem.tip.unit : product.unit}
-                  </span>
-                  <span className="font-bold text-blue-600">
-                    {formatPrice(cartItem ? cartItem.tip.price : product.price)}
-                  </span>
-                </p>
 
                 <div
                   className="flex items-center justify-between mt-2"
@@ -254,11 +350,10 @@ const CategoryProducts = () => {
                     </div>
                   ) : (
                     <button
-                      className="w-full py-2 bg-blue-600 text-white rounded-md flex  text-sm items-center justify-center"
+                      className="font-bold mx-auto p-1 px-2 rounded-lg shadow-lg border border-t-0 mb-2 text-blue-600 flex items-center gap-2"
                       onClick={() => addToCart(product.id)}
                     >
-                      <FaCartPlus className="mr-2" />
-                      {t("add_to_cart")}
+                      {formatPrice(displayPrice)}
                     </button>
                   )}
                 </div>

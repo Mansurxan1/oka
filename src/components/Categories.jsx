@@ -21,6 +21,27 @@ const Categories = () => {
   );
 
   const prevCategoriesRef = useRef(localCategories);
+  const headerRef = useRef(null);
+  const [isSticky, setIsSticky] = useState(false);
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        setIsSticky(!entry.isIntersecting);
+      },
+      { root: null, threshold: 1.0 }
+    );
+
+    if (headerRef.current) {
+      observer.observe(headerRef.current);
+    }
+
+    return () => {
+      if (headerRef.current) {
+        observer.unobserve(headerRef.current);
+      }
+    };
+  }, []);
 
   const fetchData = useCallback(async () => {
     if (!selectedBranch?.id) return;
@@ -37,7 +58,6 @@ const Categories = () => {
             "API ma'lumotlari o'zgardi. localStorage va UI yangilanmoqda..."
           );
 
-          // Eng yangi ma'lumotlarni birinchiga qo'shish
           const updatedCategories = [
             ...newCategories.filter(
               (cat) => !prevCategories.some((prev) => prev.id === cat.id)
@@ -75,51 +95,59 @@ const Categories = () => {
   );
 
   return (
-    <div className="max-w-[450px] mx-auto p-2">
-      <div className="flex justify-between items-center mb-2">
-        <h2 className="text-xl font-bold">{t("category")}</h2>
-        <Link to="/category-all" className="text-sm text-gray-600 border-b-2">
-          {t("all_categories")}
-        </Link>
-      </div>
-
-      {filteredCategories.length > 0 ? (
-        <Swiper
-          slidesPerView={4.2}
-          spaceBetween={8}
-          freeMode={true}
-          modules={[FreeMode]}
-          breakpoints={{
-            320: { slidesPerView: 2.8, spaceBetween: 6 },
-            350: { slidesPerView: 3.2, spaceBetween: 6 },
-            400: { slidesPerView: 3.7, spaceBetween: 6 },
-            440: { slidesPerView: 4.2, spaceBetween: 8 },
-          }}
-        >
-          {filteredCategories.map((cat) => (
-            <SwiperSlide key={cat.id}>
-              <div
-                className="w-[100px] cursor-pointer flex flex-col items-center text-center"
-                onClick={() => navigate(`/category/${cat.id}`)}
-              >
-                <img
-                  src={`${import.meta.env.VITE_API_URL}/${cat.photo}`}
-                  alt={cat[`name_${i18n.language}`]}
-                  className="w-full h-[80px] rounded-md border object-cover shadow-md"
-                />
-                <h3 className="text-xs mt-1 px-2 font-medium capitalize line-clamp-2">
-                  {cat[`name_${i18n.language}`]}
-                </h3>
-              </div>
-            </SwiperSlide>
-          ))}
-        </Swiper>
-      ) : (
-        <div className="text-center capitalize font-medium text-gray-500">
-          {t("no_categories_found")}
+    <>
+      <div ref={headerRef} className="h-1"></div>{" "}
+      {/* Observer uchun bo'sh joy */}
+      <div
+        className={`max-w-[450px] sticky top-0 z-[55] bg-white mx-auto p-2 transition-shadow duration-300 ${
+          isSticky ? "shadow-md" : "shadow-none"
+        }`}
+      >
+        <div className="flex justify-between items-center mb-2">
+          <h2 className="text-xl font-bold">{t("category")}</h2>
+          <Link to="/category-all" className="text-sm text-gray-600 border-b-2">
+            {t("all_categories")}
+          </Link>
         </div>
-      )}
-    </div>
+
+        {filteredCategories.length > 0 ? (
+          <Swiper
+            slidesPerView={4.2}
+            spaceBetween={8}
+            freeMode={true}
+            modules={[FreeMode]}
+            breakpoints={{
+              320: { slidesPerView: 2.8, spaceBetween: 6 },
+              350: { slidesPerView: 3.2, spaceBetween: 6 },
+              400: { slidesPerView: 3.7, spaceBetween: 6 },
+              440: { slidesPerView: 4.2, spaceBetween: 8 },
+            }}
+          >
+            {filteredCategories.map((cat) => (
+              <SwiperSlide key={cat.id}>
+                <div
+                  className="w-[100px] cursor-pointer flex flex-col items-center text-center"
+                  onClick={() => navigate(`/category/${cat.id}`)}
+                >
+                  <img
+                    src={`${import.meta.env.VITE_API_URL}/${cat.photo}`}
+                    alt={cat[`name_${i18n.language}`]}
+                    className="w-full h-[80px] rounded-md border object-cover"
+                  />
+                  <h3 className="text-xs mt-1 px-2 font-medium capitalize line-clamp-2">
+                    {cat[`name_${i18n.language}`]}
+                  </h3>
+                </div>
+              </SwiperSlide>
+            ))}
+          </Swiper>
+        ) : (
+          <div className="text-center capitalize font-medium text-gray-500">
+            {t("no_categories_found")}
+          </div>
+        )}
+      </div>
+    </>
   );
 };
 

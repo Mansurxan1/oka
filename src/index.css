@@ -1,9 +1,6 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
-html {
-  overflow-x: hidden;
-}
 
 body {
   overflow-x: hidden;
@@ -46,7 +43,7 @@ html::-webkit-scrollbar {
   @apply bg-blue-500 scale-125;
 }
 
-.modal {
+/* .modal {
   position: fixed;
   top: 0;
   left: 0;
@@ -66,7 +63,6 @@ html::-webkit-scrollbar {
   width: 300px;
 }
 
-/* Custom styles for the date picker */
 .react-datepicker {
   font-family: inherit;
   border: 1px solid #e5e7eb;
@@ -118,4 +114,4 @@ html::-webkit-scrollbar {
   background-color: black !important;
   color: white;
 }
-
+ */

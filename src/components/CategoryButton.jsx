@@ -9,7 +9,7 @@ const CategoryButton = () => {
 
   useEffect(() => {
     const handleScroll = () => {
-      setIsVisible(window.scrollY > 500);
+      setIsVisible(window.scrollY > 300);
     };
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
@@ -24,13 +24,14 @@ const CategoryButton = () => {
   };
 
   return (
-    <>
+    <main className="relative mx-auto max-w-[450px]">
       <button
         onClick={handleClick}
-        className={`fixed z-[999] bottom-32 right-5 w-12 h-12 rounded-full bg-blue-600 flex items-center justify-center shadow-lg transition-transform ${
+        className={`fixed z-[999] bottom-32 left-[80%] w-12 h-12 rounded-full bg-blue-600 flex items-center justify-center shadow-lg transition-transform ${
           isVisible ? "opacity-100 animate-bounce" : "opacity-0"
         }`}
         style={{
+          right: "max(5px, calc(50% - 225px))",
           transition: "opacity 0.3s",
           animation: isVisible ? "1s infinite" : "none",
         }}
@@ -50,11 +51,11 @@ const CategoryButton = () => {
           }
 
           .rotate-animation {
-            animation: rotate 0.5s linear infinite;
+            animation: rotate 0.3s linear infinite;
           }
         `}
       </style>
-    </>
+    </main>
   );
 };
 
